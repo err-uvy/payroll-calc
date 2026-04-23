@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professional Payroll Calculator</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  body { font-family: 'Poppins', sans-serif; }
+
+  /* Hide arrows */
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+</style>
+
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-gray-900 to-black min-h-screen flex items-center justify-center text-white">
+
+<div class="w-full max-w-md">
+  <div class="bg-white/10 backdrop-blur-2xl border border-white/20 p-6 rounded-3xl shadow-2xl">
+    
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-semibold tracking-wide">💼 Payroll</h1>
+      <p class="text-sm text-gray-300">Smart Salary Calculator</p>
+    </div>
+
+    <div class="space-y-4">
+
+      <!-- Monthly Salary -->
+      <div>
+        <label class="text-xs text-gray-300">Monthly Salary</label>
+        <input id="basic" type="number"
+        class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
+        placeholder="Enter salary">
+      </div>
+
+      <!-- Total Days -->
+      <div>
+        <label class="text-xs text-gray-300">Total Days (Month)</label>
+        <input id="totalDays" type="number"
+        class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
+        placeholder="30 / 31 / 28">
+      </div>
+
+      <!-- Present + OT -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-300">Present Days</label>
+          <input id="presentDays" type="number"
+          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
+          placeholder="Days">
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-300">OT Hours</label>
+          <input id="otHours" type="number"
+          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
+          placeholder="Hours">
+        </div>
+      </div>
+
+      <!-- Bonus + Advance -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-300">Bonus</label>
+          <input id="bonus" type="number"
+          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
+          placeholder="Bonus">
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-300">Advance</label>
+          <input id="advance" type="number"
+          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-red-400 outline-none"
+          placeholder="Deduction">
+        </div>
+      </div>
+
+      <!-- Button -->
+      <button onclick="calculate()"
+      class="w-full bg-gradient-to-r from-green-400 to-green-600 hover:scale-[1.02] transition-all duration-200 p-3 rounded-xl font-medium shadow-lg">
+        Calculate Salary
+      </button>
+
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="mt-6"></div>
+
+  </div>
+</div>
+
+<script>
+
+function calculate() {
+
+  let basic = parseFloat(document.getElementById('basic').value) || 0;
+  let totalDays = parseFloat(document.getElementById('totalDays').value) || 30;
+  let presentDays = parseFloat(document.getElementById('presentDays').value) || 0;
+  let otHours = parseFloat(document.getElementById('otHours').value) || 0;
+  let bonus = parseFloat(document.getElementById('bonus').value) || 0;
+  let advance = parseFloat(document.getElementById('advance').value) || 0;
+
+  // Core Calculations
+  let perDay = basic / totalDays;
+  let earned = perDay * presentDays;
+  let perHour = perDay / 8;
+  let overtime = perHour * otHours;
+  let net = earned + overtime + bonus - advance;
+
+  document.getElementById('result').innerHTML = `
+    <div class="bg-gradient-to-br from-white/10 to-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
+
+      <div class="flex justify-between">
+        <span class="text-gray-300">Per Day</span>
+        <span>₹ ${perDay.toFixed(2)}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-300">Per Hour</span>
+        <span>₹ ${perHour.toFixed(2)}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-300">Earned Salary</span>
+        <span>₹ ${earned.toFixed(2)}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-300">Overtime Pay</span>
+        <span>₹ ${overtime.toFixed(2)}</span>
+      </div>
+
+      <hr class="border-white/10">
+
+      <div class="flex justify-between text-lg font-semibold text-green-400">
+        <span>Net Salary</span>
+        <span>₹ ${net.toFixed(2)}</span>
+      </div>
+
+    </div>
+  `;
+}
+
+</script>
+
+</body>
+</html>
