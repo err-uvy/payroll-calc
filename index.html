@@ -284,6 +284,11 @@
             <p id="previewOtPay" class="mt-2 text-2xl font-extrabold text-white">₹0.00</p>
           </div>
 
+          <div class="summary-card border-sky-300/30 bg-sky-400/10">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-sky-200">Total Before Deduction</p>
+            <p id="previewGrossSalary" class="mt-2 text-2xl font-extrabold text-sky-100">₹0.00</p>
+          </div>
+
           <div class="summary-card border-emerald-300/30 bg-emerald-400/10">
             <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200">Net Salary</p>
             <p id="previewNetSalary" class="mt-2 text-2xl font-extrabold text-emerald-100">₹0.00</p>
@@ -301,10 +306,15 @@
             <p class="mt-1 text-sm text-slate-400">Employee payroll register for the current month.</p>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 sm:min-w-[360px]">
+          <div class="grid gap-3 sm:min-w-[520px] sm:grid-cols-3">
             <div class="summary-card">
               <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Employees</p>
               <p id="employeeCount" class="mt-2 text-2xl font-extrabold text-white">0</p>
+            </div>
+
+            <div class="summary-card border-sky-300/30 bg-sky-400/10">
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-sky-200">Before Deduction</p>
+              <p id="totalGrossPayroll" class="mt-2 text-2xl font-extrabold text-sky-100">₹0.00</p>
             </div>
 
             <div class="summary-card border-teal-300/30 bg-teal-400/10">
@@ -315,7 +325,7 @@
         </div>
 
         <div class="overflow-x-auto rounded-lg border border-white/10">
-          <table class="min-w-[1100px] w-full text-left text-sm">
+          <table class="min-w-[1240px] w-full text-left text-sm">
             <thead class="bg-white/10 text-xs uppercase tracking-[0.12em] text-slate-300">
               <tr>
                 <th class="px-4 py-3 font-bold">Employee Name</th>
@@ -324,6 +334,7 @@
                 <th class="px-4 py-3 font-bold">Absent Days</th>
                 <th class="px-4 py-3 font-bold">OT Hours</th>
                 <th class="px-4 py-3 font-bold">Bonus</th>
+                <th class="px-4 py-3 font-bold">Before Deduction</th>
                 <th class="px-4 py-3 font-bold">Deductions</th>
                 <th class="px-4 py-3 font-bold">Net Salary</th>
                 <th class="no-print px-4 py-3 font-bold">Action</th>
@@ -331,7 +342,7 @@
             </thead>
             <tbody id="payrollTableBody" class="divide-y divide-white/10">
               <tr id="emptyState">
-                <td colspan="9" class="px-4 py-12 text-center">
+                <td colspan="10" class="px-4 py-12 text-center">
                   <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
                     <div class="rounded-lg bg-white/10 p-4 text-slate-300">
                       <i data-lucide="clipboard-list" class="h-7 w-7"></i>
@@ -375,10 +386,12 @@
       perHour: document.getElementById("previewPerHour"),
       earned: document.getElementById("previewEarned"),
       overtimePay: document.getElementById("previewOtPay"),
+      grossSalary: document.getElementById("previewGrossSalary"),
       netSalary: document.getElementById("previewNetSalary")
     };
 
     const employeeCount = document.getElementById("employeeCount");
+    const totalGrossPayroll = document.getElementById("totalGrossPayroll");
     const totalPayroll = document.getElementById("totalPayroll");
 
     const currencyFormatter = new Intl.NumberFormat("en-IN", {
@@ -415,7 +428,8 @@
       const perHour = perDay / 8;
       const earnedSalary = perDay * presentDays;
       const overtimePay = perHour * otHours;
-      const netSalary = earnedSalary + overtimePay + bonus - advance;
+      const grossSalary = earnedSalary + overtimePay + bonus;
+      const netSalary = grossSalary - advance;
 
       return {
         monthlySalary,
@@ -429,6 +443,7 @@
         perHour,
         earnedSalary,
         overtimePay,
+        grossSalary,
         netSalary
       };
     }
@@ -453,6 +468,7 @@
       preview.perHour.textContent = formatCurrency(calculation.perHour);
       preview.earned.textContent = formatCurrency(calculation.earnedSalary);
       preview.overtimePay.textContent = formatCurrency(calculation.overtimePay);
+      preview.grossSalary.textContent = formatCurrency(calculation.grossSalary);
       preview.netSalary.textContent = formatCurrency(calculation.netSalary);
     }
 
@@ -460,7 +476,7 @@
       if (employees.length === 0) {
         tableBody.innerHTML = `
           <tr id="emptyState">
-            <td colspan="9" class="px-4 py-12 text-center">
+            <td colspan="10" class="px-4 py-12 text-center">
               <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
                 <div class="rounded-lg bg-white/10 p-4 text-slate-300">
                   <i data-lucide="clipboard-list" class="h-7 w-7"></i>
@@ -482,6 +498,7 @@
             <td class="px-4 py-4 text-slate-300">${employee.absentDays}</td>
             <td class="px-4 py-4 text-slate-300">${employee.otHours}</td>
             <td class="px-4 py-4 text-emerald-200">${formatCurrency(employee.bonus)}</td>
+            <td class="px-4 py-4 font-bold text-sky-100">${formatCurrency(employee.grossSalary)}</td>
             <td class="px-4 py-4 text-rose-200">${formatCurrency(employee.advance)}</td>
             <td class="px-4 py-4 font-extrabold text-teal-100">${formatCurrency(employee.netSalary)}</td>
             <td class="no-print px-4 py-4">
@@ -498,8 +515,10 @@
         `).join("");
       }
 
+      const grossPayrollTotal = employees.reduce((sum, employee) => sum + employee.grossSalary, 0);
       const payrollTotal = employees.reduce((sum, employee) => sum + employee.netSalary, 0);
       employeeCount.textContent = employees.length;
+      totalGrossPayroll.textContent = formatCurrency(grossPayrollTotal);
       totalPayroll.textContent = formatCurrency(payrollTotal);
 
       if (window.lucide) {
