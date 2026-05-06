@@ -265,6 +265,11 @@
           </div>
 
           <div class="summary-card">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Extra Days</p>
+            <p id="previewExtraDays" class="mt-2 text-2xl font-extrabold text-white">0</p>
+          </div>
+
+          <div class="summary-card">
             <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Per Day</p>
             <p id="previewPerDay" class="mt-2 text-2xl font-extrabold text-white">₹0.00</p>
           </div>
@@ -325,13 +330,14 @@
         </div>
 
         <div class="overflow-x-auto rounded-lg border border-white/10">
-          <table class="min-w-[1240px] w-full text-left text-sm">
+          <table class="min-w-[1360px] w-full text-left text-sm">
             <thead class="bg-white/10 text-xs uppercase tracking-[0.12em] text-slate-300">
               <tr>
                 <th class="px-4 py-3 font-bold">Employee Name</th>
                 <th class="px-4 py-3 font-bold">Monthly Salary</th>
                 <th class="px-4 py-3 font-bold">Present Days</th>
                 <th class="px-4 py-3 font-bold">Absent Days</th>
+                <th class="px-4 py-3 font-bold">Extra Days</th>
                 <th class="px-4 py-3 font-bold">OT Hours</th>
                 <th class="px-4 py-3 font-bold">Bonus</th>
                 <th class="px-4 py-3 font-bold">Before Deduction</th>
@@ -342,7 +348,7 @@
             </thead>
             <tbody id="payrollTableBody" class="divide-y divide-white/10">
               <tr id="emptyState">
-                <td colspan="10" class="px-4 py-12 text-center">
+                <td colspan="11" class="px-4 py-12 text-center">
                   <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
                     <div class="rounded-lg bg-white/10 p-4 text-slate-300">
                       <i data-lucide="clipboard-list" class="h-7 w-7"></i>
@@ -382,6 +388,7 @@
 
     const preview = {
       absentDays: document.getElementById("previewAbsentDays"),
+      extraDays: document.getElementById("previewExtraDays"),
       perDay: document.getElementById("previewPerDay"),
       perHour: document.getElementById("previewPerHour"),
       earned: document.getElementById("previewEarned"),
@@ -418,12 +425,13 @@
     function calculatePayroll(data) {
       const monthlySalary = Math.max(getNumber(data.monthlySalary), 0);
       const totalDays = Math.max(getNumber(data.totalDays, 30), 1);
-      const presentDays = Math.min(Math.max(getNumber(data.presentDays), 0), totalDays);
+      const presentDays = Math.max(getNumber(data.presentDays), 0);
       const otHours = Math.max(getNumber(data.otHours), 0);
       const bonus = Math.max(getNumber(data.bonus), 0);
       const advance = Math.max(getNumber(data.advance), 0);
 
-      const absentDays = totalDays - presentDays;
+      const absentDays = Math.max(totalDays - presentDays, 0);
+      const extraDays = Math.max(presentDays - totalDays, 0);
       const perDay = monthlySalary / totalDays;
       const perHour = perDay / 8;
       const earnedSalary = perDay * presentDays;
@@ -436,6 +444,7 @@
         totalDays,
         presentDays,
         absentDays,
+        extraDays,
         otHours,
         bonus,
         advance,
@@ -464,6 +473,7 @@
       const calculation = calculatePayroll(getFormData());
 
       preview.absentDays.textContent = calculation.absentDays;
+      preview.extraDays.textContent = calculation.extraDays;
       preview.perDay.textContent = formatCurrency(calculation.perDay);
       preview.perHour.textContent = formatCurrency(calculation.perHour);
       preview.earned.textContent = formatCurrency(calculation.earnedSalary);
@@ -476,7 +486,7 @@
       if (employees.length === 0) {
         tableBody.innerHTML = `
           <tr id="emptyState">
-            <td colspan="10" class="px-4 py-12 text-center">
+            <td colspan="11" class="px-4 py-12 text-center">
               <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
                 <div class="rounded-lg bg-white/10 p-4 text-slate-300">
                   <i data-lucide="clipboard-list" class="h-7 w-7"></i>
@@ -496,6 +506,7 @@
             <td class="px-4 py-4 text-slate-300">${formatCurrency(employee.monthlySalary)}</td>
             <td class="px-4 py-4 text-slate-300">${employee.presentDays}</td>
             <td class="px-4 py-4 text-slate-300">${employee.absentDays}</td>
+            <td class="px-4 py-4 text-sky-200">${employee.extraDays}</td>
             <td class="px-4 py-4 text-slate-300">${employee.otHours}</td>
             <td class="px-4 py-4 text-emerald-200">${formatCurrency(employee.bonus)}</td>
             <td class="px-4 py-4 font-bold text-sky-100">${formatCurrency(employee.grossSalary)}</td>
