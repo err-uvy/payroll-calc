@@ -315,7 +315,7 @@
         </div>
 
         <div class="overflow-x-auto rounded-lg border border-white/10">
-          <table class="min-w-[980px] w-full text-left text-sm">
+          <table class="min-w-[1100px] w-full text-left text-sm">
             <thead class="bg-white/10 text-xs uppercase tracking-[0.12em] text-slate-300">
               <tr>
                 <th class="px-4 py-3 font-bold">Employee Name</th>
@@ -326,11 +326,12 @@
                 <th class="px-4 py-3 font-bold">Bonus</th>
                 <th class="px-4 py-3 font-bold">Deductions</th>
                 <th class="px-4 py-3 font-bold">Net Salary</th>
+                <th class="no-print px-4 py-3 font-bold">Action</th>
               </tr>
             </thead>
             <tbody id="payrollTableBody" class="divide-y divide-white/10">
               <tr id="emptyState">
-                <td colspan="8" class="px-4 py-12 text-center">
+                <td colspan="9" class="px-4 py-12 text-center">
                   <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
                     <div class="rounded-lg bg-white/10 p-4 text-slate-300">
                       <i data-lucide="clipboard-list" class="h-7 w-7"></i>
@@ -459,7 +460,7 @@
       if (employees.length === 0) {
         tableBody.innerHTML = `
           <tr id="emptyState">
-            <td colspan="8" class="px-4 py-12 text-center">
+            <td colspan="9" class="px-4 py-12 text-center">
               <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
                 <div class="rounded-lg bg-white/10 p-4 text-slate-300">
                   <i data-lucide="clipboard-list" class="h-7 w-7"></i>
@@ -473,7 +474,7 @@
           </tr>
         `;
       } else {
-        tableBody.innerHTML = employees.map((employee) => `
+        tableBody.innerHTML = employees.map((employee, index) => `
           <tr class="transition hover:bg-white/10">
             <td class="px-4 py-4 font-bold text-white">${escapeHTML(employee.employeeName)}</td>
             <td class="px-4 py-4 text-slate-300">${formatCurrency(employee.monthlySalary)}</td>
@@ -483,6 +484,16 @@
             <td class="px-4 py-4 text-emerald-200">${formatCurrency(employee.bonus)}</td>
             <td class="px-4 py-4 text-rose-200">${formatCurrency(employee.advance)}</td>
             <td class="px-4 py-4 font-extrabold text-teal-100">${formatCurrency(employee.netSalary)}</td>
+            <td class="no-print px-4 py-4">
+              <button
+                type="button"
+                onclick="removeEmployee(${index})"
+                aria-label="Remove ${escapeHTML(employee.employeeName)}"
+                class="inline-flex items-center justify-center rounded-lg border border-rose-300/25 bg-rose-500/10 p-2 text-rose-200 transition hover:-translate-y-0.5 hover:bg-rose-500/20"
+              >
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+              </button>
+            </td>
           </tr>
         `).join("");
       }
@@ -494,6 +505,12 @@
       if (window.lucide) {
         lucide.createIcons();
       }
+    }
+
+    function removeEmployee(index) {
+      employees.splice(index, 1);
+      renderPayrollTable();
+      showToast("Employee removed successfully.");
     }
 
     function showToast(message) {
