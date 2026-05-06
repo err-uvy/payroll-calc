@@ -1,159 +1,553 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Professional Payroll Calculator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional Payroll Calculator</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-<style>
-  body { font-family: 'Poppins', sans-serif; }
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  /* Hide arrows */
-  input[type=number]::-webkit-outer-spin-button,
-  input[type=number]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  input[type=number] {
-    -moz-appearance: textfield;
-  }
-</style>
+  <style>
+    /* Base styles */
+    :root {
+      color-scheme: dark;
+    }
 
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        linear-gradient(135deg, rgba(20, 184, 166, 0.14), transparent 34%),
+        linear-gradient(225deg, rgba(244, 114, 182, 0.12), transparent 30%),
+        #080b12;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 78%);
+    }
+
+    /* Hide number input arrows */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(22px);
+    }
+
+    .field {
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.78rem 0.9rem;
+      color: white;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .field::placeholder {
+      color: rgba(203, 213, 225, 0.62);
+    }
+
+    .field:focus {
+      border-color: rgba(45, 212, 191, 0.8);
+      background: rgba(255, 255, 255, 0.11);
+      box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.14);
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 0.42rem;
+      color: rgb(203, 213, 225);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .summary-card {
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.075);
+      padding: 1rem;
+    }
+
+    .toast {
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Clean print view */
+    @media print {
+      body {
+        background: white !important;
+        color: #111827 !important;
+      }
+
+      body::before,
+      .no-print {
+        display: none !important;
+      }
+
+      .print-area {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .print-card {
+        background: white !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        color: #111827 !important;
+      }
+
+      .print-card * {
+        color: #111827 !important;
+      }
+
+      table {
+        width: 100% !important;
+        min-width: 0 !important;
+        border-collapse: collapse !important;
+        font-size: 11px !important;
+      }
+
+      th,
+      td {
+        border: 1px solid #d1d5db !important;
+        padding: 7px !important;
+      }
+
+      thead {
+        background: #f3f4f6 !important;
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-gradient-to-br from-slate-900 via-gray-900 to-black min-h-screen flex items-center justify-center text-white">
-
-<div class="w-full max-w-md">
-  <div class="bg-white/10 backdrop-blur-2xl border border-white/20 p-6 rounded-3xl shadow-2xl">
-    
-    <div class="text-center mb-6">
-      <h1 class="text-3xl font-semibold tracking-wide">💼 Payroll</h1>
-      <p class="text-sm text-gray-300">Smart Salary Calculator</p>
+<body class="text-white">
+  <div class="relative mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <!-- Toast -->
+    <div id="toast" class="toast no-print fixed right-4 top-4 z-50 rounded-lg border border-emerald-300/30 bg-emerald-500/15 px-4 py-3 text-sm font-semibold text-emerald-100 shadow-xl backdrop-blur-xl">
+      Employee added successfully.
     </div>
 
-    <div class="space-y-4">
-
-      <!-- Monthly Salary -->
+    <!-- Header -->
+    <header class="no-print mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <label class="text-xs text-gray-300">Monthly Salary</label>
-        <input id="basic" type="number"
-        class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
-        placeholder="Enter salary">
+        <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-200">
+          <i data-lucide="briefcase-business" class="h-3.5 w-3.5"></i>
+          HR Payroll Desk
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-normal text-white sm:text-4xl">
+          Professional Payroll Calculator
+        </h1>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+          Add employees, calculate salary components instantly, and print a clean payroll statement.
+        </p>
       </div>
 
-      <!-- Total Days -->
-      <div>
-        <label class="text-xs text-gray-300">Total Days (Month)</label>
-        <input id="totalDays" type="number"
-        class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
-        placeholder="30 / 31 / 28">
-      </div>
-
-      <!-- Present + OT -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs text-gray-300">Present Days</label>
-          <input id="presentDays" type="number"
-          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
-          placeholder="Days">
-        </div>
-
-        <div>
-          <label class="text-xs text-gray-300">OT Hours</label>
-          <input id="otHours" type="number"
-          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
-          placeholder="Hours">
-        </div>
-      </div>
-
-      <!-- Bonus + Advance -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs text-gray-300">Bonus</label>
-          <input id="bonus" type="number"
-          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-green-400 outline-none"
-          placeholder="Bonus">
-        </div>
-
-        <div>
-          <label class="text-xs text-gray-300">Advance</label>
-          <input id="advance" type="number"
-          class="w-full mt-1 p-3 rounded-xl bg-white/20 focus:ring-2 focus:ring-red-400 outline-none"
-          placeholder="Deduction">
-        </div>
-      </div>
-
-      <!-- Button -->
-      <button onclick="calculate()"
-      class="w-full bg-gradient-to-r from-green-400 to-green-600 hover:scale-[1.02] transition-all duration-200 p-3 rounded-xl font-medium shadow-lg">
-        Calculate Salary
+      <button id="printBtn" type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/15 sm:w-auto">
+        <i data-lucide="printer" class="h-4 w-4"></i>
+        Print Payroll
       </button>
+    </header>
 
-    </div>
+    <main class="grid gap-6 lg:grid-cols-[420px_1fr]">
+      <!-- Employee form -->
+      <section class="glass-panel no-print rounded-lg p-5 sm:p-6">
+        <div class="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-bold text-white">Employee Payroll Form</h2>
+            <p class="mt-1 text-sm text-slate-400">Enter salary and attendance details.</p>
+          </div>
+          <div class="rounded-lg bg-teal-400/10 p-3 text-teal-200">
+            <i data-lucide="user-round-plus" class="h-5 w-5"></i>
+          </div>
+        </div>
 
-    <!-- Result -->
-    <div id="result" class="mt-6"></div>
+        <form id="payrollForm" class="space-y-4">
+          <div>
+            <label for="employeeName" class="label">Employee Name</label>
+            <input id="employeeName" class="field" type="text" placeholder="Enter employee name" autocomplete="off">
+          </div>
 
+          <div>
+            <label for="monthlySalary" class="label">Monthly Salary</label>
+            <input id="monthlySalary" class="field" type="number" min="0" step="0.01" placeholder="Example: 25000">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="totalDays" class="label">Total Days</label>
+              <input id="totalDays" class="field" type="number" min="1" step="1" placeholder="30">
+            </div>
+
+            <div>
+              <label for="presentDays" class="label">Present Days</label>
+              <input id="presentDays" class="field" type="number" min="0" step="1" placeholder="26">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="otHours" class="label">OT Hours</label>
+              <input id="otHours" class="field" type="number" min="0" step="0.5" placeholder="8">
+            </div>
+
+            <div>
+              <label for="bonus" class="label">Bonus</label>
+              <input id="bonus" class="field" type="number" min="0" step="0.01" placeholder="1000">
+            </div>
+          </div>
+
+          <div>
+            <label for="advance" class="label">Advance / Deductions</label>
+            <input id="advance" class="field" type="number" min="0" step="0.01" placeholder="500">
+          </div>
+
+          <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-teal-400 via-emerald-400 to-lime-300 px-4 py-3 text-sm font-extrabold text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:-translate-y-0.5 hover:shadow-emerald-500/20">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            Add Employee
+          </button>
+        </form>
+      </section>
+
+      <!-- Live calculation preview -->
+      <section class="glass-panel no-print rounded-lg p-5 sm:p-6">
+        <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white">Live Salary Preview</h2>
+            <p class="mt-1 text-sm text-slate-400">Calculations update automatically as you type.</p>
+          </div>
+          <div class="rounded-lg bg-fuchsia-400/10 p-3 text-fuchsia-200 sm:self-start">
+            <i data-lucide="calculator" class="h-5 w-5"></i>
+          </div>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div class="summary-card">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Absent Days</p>
+            <p id="previewAbsentDays" class="mt-2 text-2xl font-extrabold text-white">0</p>
+          </div>
+
+          <div class="summary-card">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Per Day</p>
+            <p id="previewPerDay" class="mt-2 text-2xl font-extrabold text-white">₹0.00</p>
+          </div>
+
+          <div class="summary-card">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Per Hour</p>
+            <p id="previewPerHour" class="mt-2 text-2xl font-extrabold text-white">₹0.00</p>
+          </div>
+
+          <div class="summary-card">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Earned Salary</p>
+            <p id="previewEarned" class="mt-2 text-2xl font-extrabold text-white">₹0.00</p>
+          </div>
+
+          <div class="summary-card">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Overtime Pay</p>
+            <p id="previewOtPay" class="mt-2 text-2xl font-extrabold text-white">₹0.00</p>
+          </div>
+
+          <div class="summary-card border-emerald-300/30 bg-emerald-400/10">
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200">Net Salary</p>
+            <p id="previewNetSalary" class="mt-2 text-2xl font-extrabold text-emerald-100">₹0.00</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Printable payroll section -->
+    <section id="payrollPrintArea" class="print-area mt-6">
+      <div class="glass-panel print-card rounded-lg p-5 sm:p-6">
+        <div class="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white">Payroll Summary</h2>
+            <p class="mt-1 text-sm text-slate-400">Employee payroll register for the current month.</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 sm:min-w-[360px]">
+            <div class="summary-card">
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Employees</p>
+              <p id="employeeCount" class="mt-2 text-2xl font-extrabold text-white">0</p>
+            </div>
+
+            <div class="summary-card border-teal-300/30 bg-teal-400/10">
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-teal-200">Total Payroll</p>
+              <p id="totalPayroll" class="mt-2 text-2xl font-extrabold text-teal-100">₹0.00</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg border border-white/10">
+          <table class="min-w-[980px] w-full text-left text-sm">
+            <thead class="bg-white/10 text-xs uppercase tracking-[0.12em] text-slate-300">
+              <tr>
+                <th class="px-4 py-3 font-bold">Employee Name</th>
+                <th class="px-4 py-3 font-bold">Monthly Salary</th>
+                <th class="px-4 py-3 font-bold">Present Days</th>
+                <th class="px-4 py-3 font-bold">Absent Days</th>
+                <th class="px-4 py-3 font-bold">OT Hours</th>
+                <th class="px-4 py-3 font-bold">Bonus</th>
+                <th class="px-4 py-3 font-bold">Deductions</th>
+                <th class="px-4 py-3 font-bold">Net Salary</th>
+              </tr>
+            </thead>
+            <tbody id="payrollTableBody" class="divide-y divide-white/10">
+              <tr id="emptyState">
+                <td colspan="8" class="px-4 py-12 text-center">
+                  <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
+                    <div class="rounded-lg bg-white/10 p-4 text-slate-300">
+                      <i data-lucide="clipboard-list" class="h-7 w-7"></i>
+                    </div>
+                    <div>
+                      <p class="font-bold text-slate-200">No employees added yet</p>
+                      <p class="mt-1 text-sm">Fill the payroll form and add the first employee.</p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </div>
-</div>
 
-<script>
+  <script>
+    // Store all employee payroll entries here.
+    const employees = [];
 
-function calculate() {
+    const form = document.getElementById("payrollForm");
+    const toast = document.getElementById("toast");
+    const printBtn = document.getElementById("printBtn");
+    const tableBody = document.getElementById("payrollTableBody");
 
-  let basic = parseFloat(document.getElementById('basic').value) || 0;
-  let totalDays = parseFloat(document.getElementById('totalDays').value) || 30;
-  let presentDays = parseFloat(document.getElementById('presentDays').value) || 0;
-  let otHours = parseFloat(document.getElementById('otHours').value) || 0;
-  let bonus = parseFloat(document.getElementById('bonus').value) || 0;
-  let advance = parseFloat(document.getElementById('advance').value) || 0;
+    const fields = {
+      employeeName: document.getElementById("employeeName"),
+      monthlySalary: document.getElementById("monthlySalary"),
+      totalDays: document.getElementById("totalDays"),
+      presentDays: document.getElementById("presentDays"),
+      otHours: document.getElementById("otHours"),
+      bonus: document.getElementById("bonus"),
+      advance: document.getElementById("advance")
+    };
 
-  // Core Calculations
-  let perDay = basic / totalDays;
-  let earned = perDay * presentDays;
-  let perHour = perDay / 8;
-  let overtime = perHour * otHours;
-  let net = earned + overtime + bonus - advance;
+    const preview = {
+      absentDays: document.getElementById("previewAbsentDays"),
+      perDay: document.getElementById("previewPerDay"),
+      perHour: document.getElementById("previewPerHour"),
+      earned: document.getElementById("previewEarned"),
+      overtimePay: document.getElementById("previewOtPay"),
+      netSalary: document.getElementById("previewNetSalary")
+    };
 
-  document.getElementById('result').innerHTML = `
-    <div class="bg-gradient-to-br from-white/10 to-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
+    const employeeCount = document.getElementById("employeeCount");
+    const totalPayroll = document.getElementById("totalPayroll");
 
-      <div class="flex justify-between">
-        <span class="text-gray-300">Per Day</span>
-        <span>₹ ${perDay.toFixed(2)}</span>
-      </div>
+    const currencyFormatter = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2
+    });
 
-      <div class="flex justify-between">
-        <span class="text-gray-300">Per Hour</span>
-        <span>₹ ${perHour.toFixed(2)}</span>
-      </div>
+    function getNumber(value, fallback = 0) {
+      const number = parseFloat(value);
+      return Number.isFinite(number) ? number : fallback;
+    }
 
-      <div class="flex justify-between">
-        <span class="text-gray-300">Earned Salary</span>
-        <span>₹ ${earned.toFixed(2)}</span>
-      </div>
+    function formatCurrency(amount) {
+      return currencyFormatter.format(amount);
+    }
 
-      <div class="flex justify-between">
-        <span class="text-gray-300">Overtime Pay</span>
-        <span>₹ ${overtime.toFixed(2)}</span>
-      </div>
+    function escapeHTML(value) {
+      const element = document.createElement("div");
+      element.textContent = value;
+      return element.innerHTML;
+    }
 
-      <hr class="border-white/10">
+    function calculatePayroll(data) {
+      const monthlySalary = Math.max(getNumber(data.monthlySalary), 0);
+      const totalDays = Math.max(getNumber(data.totalDays, 30), 1);
+      const presentDays = Math.min(Math.max(getNumber(data.presentDays), 0), totalDays);
+      const otHours = Math.max(getNumber(data.otHours), 0);
+      const bonus = Math.max(getNumber(data.bonus), 0);
+      const advance = Math.max(getNumber(data.advance), 0);
 
-      <div class="flex justify-between text-lg font-semibold text-green-400">
-        <span>Net Salary</span>
-        <span>₹ ${net.toFixed(2)}</span>
-      </div>
+      const absentDays = totalDays - presentDays;
+      const perDay = monthlySalary / totalDays;
+      const perHour = perDay / 8;
+      const earnedSalary = perDay * presentDays;
+      const overtimePay = perHour * otHours;
+      const netSalary = earnedSalary + overtimePay + bonus - advance;
 
-    </div>
-  `;
-}
+      return {
+        monthlySalary,
+        totalDays,
+        presentDays,
+        absentDays,
+        otHours,
+        bonus,
+        advance,
+        perDay,
+        perHour,
+        earnedSalary,
+        overtimePay,
+        netSalary
+      };
+    }
 
-</script>
+    function getFormData() {
+      return {
+        employeeName: fields.employeeName.value.trim(),
+        monthlySalary: fields.monthlySalary.value,
+        totalDays: fields.totalDays.value,
+        presentDays: fields.presentDays.value,
+        otHours: fields.otHours.value,
+        bonus: fields.bonus.value,
+        advance: fields.advance.value
+      };
+    }
 
+    function updatePreview() {
+      const calculation = calculatePayroll(getFormData());
+
+      preview.absentDays.textContent = calculation.absentDays;
+      preview.perDay.textContent = formatCurrency(calculation.perDay);
+      preview.perHour.textContent = formatCurrency(calculation.perHour);
+      preview.earned.textContent = formatCurrency(calculation.earnedSalary);
+      preview.overtimePay.textContent = formatCurrency(calculation.overtimePay);
+      preview.netSalary.textContent = formatCurrency(calculation.netSalary);
+    }
+
+    function renderPayrollTable() {
+      if (employees.length === 0) {
+        tableBody.innerHTML = `
+          <tr id="emptyState">
+            <td colspan="8" class="px-4 py-12 text-center">
+              <div class="mx-auto flex max-w-sm flex-col items-center gap-3 text-slate-400">
+                <div class="rounded-lg bg-white/10 p-4 text-slate-300">
+                  <i data-lucide="clipboard-list" class="h-7 w-7"></i>
+                </div>
+                <div>
+                  <p class="font-bold text-slate-200">No employees added yet</p>
+                  <p class="mt-1 text-sm">Fill the payroll form and add the first employee.</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = employees.map((employee) => `
+          <tr class="transition hover:bg-white/10">
+            <td class="px-4 py-4 font-bold text-white">${escapeHTML(employee.employeeName)}</td>
+            <td class="px-4 py-4 text-slate-300">${formatCurrency(employee.monthlySalary)}</td>
+            <td class="px-4 py-4 text-slate-300">${employee.presentDays}</td>
+            <td class="px-4 py-4 text-slate-300">${employee.absentDays}</td>
+            <td class="px-4 py-4 text-slate-300">${employee.otHours}</td>
+            <td class="px-4 py-4 text-emerald-200">${formatCurrency(employee.bonus)}</td>
+            <td class="px-4 py-4 text-rose-200">${formatCurrency(employee.advance)}</td>
+            <td class="px-4 py-4 font-extrabold text-teal-100">${formatCurrency(employee.netSalary)}</td>
+          </tr>
+        `).join("");
+      }
+
+      const payrollTotal = employees.reduce((sum, employee) => sum + employee.netSalary, 0);
+      employeeCount.textContent = employees.length;
+      totalPayroll.textContent = formatCurrency(payrollTotal);
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
+    }
+
+    function clearForm() {
+      form.reset();
+      fields.totalDays.value = "";
+      updatePreview();
+      fields.employeeName.focus();
+    }
+
+    form.addEventListener("input", updatePreview);
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const formData = getFormData();
+
+      if (!formData.employeeName) {
+        fields.employeeName.focus();
+        showToast("Please enter employee name.");
+        return;
+      }
+
+      const calculation = calculatePayroll(formData);
+
+      employees.push({
+        employeeName: formData.employeeName,
+        ...calculation
+      });
+
+      renderPayrollTable();
+      clearForm();
+      showToast("Employee added successfully.");
+    });
+
+    printBtn.addEventListener("click", function () {
+      window.print();
+    });
+
+    // Initial render
+    updatePreview();
+    renderPayrollTable();
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
 </body>
 </html>
